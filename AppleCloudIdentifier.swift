@@ -7,18 +7,21 @@
 import UIKit
 import CloudKit
 
+enum AppleCloudIdentifierError: Error {
+    case unknown
+}
+
 class AppleCloudIdentifier: NSObject {
     
-    class func fetch(onCompletion completionHandler: (identifier: String?, error: NSError?) -> Void) {
-        
-        let container = CKContainer.defaultContainer()
-        container.fetchUserRecordIDWithCompletionHandler { (recordID, error) in
+    class func fetch(_ completionHandler: @escaping (Result<String, Error>) -> Void) {
+        let container = CKContainer.default()
+        container.fetchUserRecordID { (recordID, error) in
             guard let recordID = recordID else {
-                completionHandler(identifier: nil, error: error)
+                completionHandler(.failure(error ?? AppleCloudIdentifierError.unknown))
                 return
             }
-            completionHandler(identifier: recordID.recordName, error: nil)
+            completionHandler(.success(recordID.recordName))
         }
     }
-
+    
 }
